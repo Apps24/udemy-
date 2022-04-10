@@ -9,7 +9,7 @@ export const makeInstructor = async (req, res) => {
     const user = await User.findById(req.user._id).exec();
     // 2. if user dont have stripe_account_id yet, then create new
     if (!user.stripe_account_id) {
-      const account = await stripe.accounts.create({ type: "express" });
+      const account = await stripe.accounts.create({ type: "standard" });
       // console.log('ACCOUNT => ', account.id)
       user.stripe_account_id = account.id;
       user.save();
@@ -78,6 +78,29 @@ export const instructorCourses = async (req, res) => {
       .sort({ createdAt: -1 })
       .exec();
     res.json(courses);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+export const studentCount = async (req, res) => {
+  try {
+    const users = await User.find({ courses: req.body.courseId })
+      .select("_id")
+      .exec();
+    res.json(users);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+export const instructorBalance = async (req, res) => {
+  try {
+    let user = await User.findById(req.user._id).exec();
+    const balance = await stripe.balance.retrieve({
+      stripeAccount: user.stripe_account_id,
+    });
+    res.json(balance);
   } catch (err) {
     console.log(err);
   }

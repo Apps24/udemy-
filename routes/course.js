@@ -4,7 +4,7 @@ import formidable from "express-formidable";
 const router = express.Router();
 
 // middleware
-import { requireSignin, isInstructor } from "../middlewares";
+import { requireSignin, isInstructor, isEnrolled } from "../middlewares";
 
 // controllers
 import {
@@ -21,6 +21,14 @@ import {
   publishCourse,
   unpublishCourse,
   courses,
+  checkEnrollment,
+  freeEnrollment,
+  paidEnrollment,
+  stripeSuccess,
+  userCourses,
+  markCompleted,
+  listCompleted,
+  markIncomplete,
 } from "../controllers/course";
 
 router.get("/courses", courses);
@@ -47,5 +55,20 @@ router.put("/course/unpublish/:courseId", requireSignin, unpublishCourse);
 router.post("/course/lesson/:slug/:instructorId", requireSignin, addLesson);
 router.put("/course/lesson/:slug/:instructorId", requireSignin, updateLesson);
 router.put("/course/:slug/:lessonId", requireSignin, removeLesson);
+
+router.get("/check-enrollment/:courseId", requireSignin, checkEnrollment);
+
+// enrollment
+router.post("/free-enrollment/:courseId", requireSignin, freeEnrollment);
+router.post("/paid-enrollment/:courseId", requireSignin, paidEnrollment);
+router.get("/stripe-success/:courseId", requireSignin, stripeSuccess);
+
+router.get("/user-courses", requireSignin, userCourses);
+router.get("/user/course/:slug", requireSignin, isEnrolled, read);
+
+// mark completed
+router.post("/mark-completed", requireSignin, markCompleted);
+router.post("/list-completed", requireSignin, listCompleted);
+router.post("/mark-incomplete", requireSignin, markIncomplete);
 
 module.exports = router;
